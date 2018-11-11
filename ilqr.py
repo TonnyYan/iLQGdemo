@@ -8,11 +8,7 @@ from autograd import grad, jacobian
 
 class iLQG:
 	def __init__(self, umax, state_dim, action_dim, pred_time = 50, n = 5):
-		rospy.init_node('iLQGalgorithm', anonymous=True)
-		self.rate = rospy.Rate(20) #1Hz 
 
-		self.pub = rospy.Publisher('AcitonPublish', action, queue_size=10)
-		rospy.Subscriber('SampleSubscrib', dataSample, self.callback)
 
 		# take sequential sample from real robot
 		self.x_seq = [np.zeros(self.state_dim) for _ in range(pred_time+1)]
@@ -60,8 +56,8 @@ class iLQG:
 			reg = LR.fit(input_x, x_[t])
 			A.append( reg.coef_[:, :self.state_dim])
 			B.append( reg.coef_[:, self.state_dim:])
-		 self.f_x = copy.deepcopy(A)
-		 self.f_u = copy.deepcopy(B)
+		self.f_x = copy.deepcopy(A)
+		self.f_u = copy.deepcopy(B)
 
 
 	def eta_update(self, x_seq, u_seq):
@@ -73,7 +69,7 @@ class iLQG:
 			for i in range(u_seq[t].shape[0]):				
 				u = u_seq[t,i,:]
 				mean_cross_entropy += (-self.action_dim/2)*np.log(2*np.pi)-0.5*np.log(np.linalg.det(self.action_sigma)) - \
-				 0.5*np.matmul(np.matmul((u - self.action_mu).T, np.linalg.inv(self.action_sigma)), (u-self.action_mu)) +
+				 0.5*np.matmul(np.matmul((u - self.action_mu).T, np.linalg.inv(self.action_sigma)), (u-self.action_mu)) +\
 				 (self.action_dim/2)*np.log(2*np.pi) + 0.5*np.log(np.linalg.det(self.action_sigma_prev)) + \
 				 0.5*np.matmul(np.matmul((u - self.action_mu_prev).T, np.linalg.inv(self.action_sigma_prev)), (u-self.action_mu_prev))
 			D_kl += mean_cross_entropy/u_seq[t].shape[0]
