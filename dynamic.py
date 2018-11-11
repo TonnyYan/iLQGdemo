@@ -6,6 +6,7 @@ from math import *
 torques = M * acc + C * vel + N
 '''
 class dynamic():
+
     def __init__(self, dof, delta_t = 0.02):
         self.dof = dof
         self.M = np.zeros((self.dof,self.dof))
@@ -76,6 +77,15 @@ class dynamic():
         self.Igx = 0.0002324
         self.Igy = 0.0003629
         self.Igz = 0.0002067
+
+
+    def init_sys(self):
+        self.M = np.zeros((self.dof,self.dof))
+        self.C = np.zeros((self.dof,self.dof))
+        self.N = np.zeros(self.dof)
+        self.pos = np.zeros(self.dof)
+        self.vel = np.zeros(self.dof)
+        self.acc = np.zeros(self.dof)
 
 
     def transition(self, torque):
