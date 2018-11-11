@@ -3,17 +3,20 @@ from math import *
 
 
 '''
-torques = M * acc + (C+Fv) * vel + N
+torques = M * acc + C * vel + N
 '''
 class dynamic():
-    def __init__(self, dof):
+    def __init__(self, dof, delta_t = 0.02):
         self.dof = dof
         self.M = np.zeros((self.dof,self.dof))
         self.C = np.zeros((self.dof,self.dof))
         self.N = np.zeros(self.dof)
         self.pos = np.zeros(self.dof)
         self.vel = np.zeros(self.dof)
-        
+        self.acc = np.zeros(self.dof)
+        self.delta_t = delta_t
+
+
         self.lbx = 0
         self.lbz = 0
         self.l1x = 0.024
@@ -75,8 +78,15 @@ class dynamic():
         self.Igz = 0.0002067
 
 
-    def transition(self):
-        pass
+    def transition(self, torque):
+        self.M_matrix()
+        self.C_matrix()
+        self.N_vector()
+        self.acc = np.dot(np.linalg.pinv(self.M), (torque - self.C * self.vel - self.N))
+        self.pos = self.pos + self.vel * self.delta_t + 0.5 * self.acc * self.delta_t **2
+        self.vel = self.vel + self.acc * self.delta_t
+
+        return self.pos, self.vel
 
 
     def M_matrix(self):
